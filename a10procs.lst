@@ -1,0 +1,1018 @@
+     1                                 %line 1+1 a10procs.asm
+     2                                 
+     3                                 
+     4                                 
+     5                                 
+     6                                 
+     7                                 
+     8                                 
+     9                                 
+    10                                 
+    11                                 
+    12                                 
+    13                                 
+    14                                 
+    15                                 
+    16                                 
+    17                                 
+    18                                 
+    19                                 
+    20                                 
+    21                                 
+    22                                 
+    23                                 
+    24                                 
+    25                                 [section .data]
+    26                                 
+    27                                 
+    28                                 
+    29                                 
+    30                                 TRUE equ 1
+    31                                 FALSE equ 0
+    32                                 
+    33                                 SUCCESS equ 0
+    34                                 NOSUCCESS equ 1
+    35                                 
+    36                                 STDIN equ 0
+    37                                 STDOUT equ 1
+    38                                 STDERR equ 2
+    39                                 
+    40                                 SYS_read equ 0
+    41                                 SYS_write equ 1
+    42                                 SYS_open equ 2
+    43                                 SYS_close equ 3
+    44                                 SYS_fork equ 57
+    45                                 SYS_exit equ 60
+    46                                 SYS_creat equ 85
+    47                                 SYS_time equ 201
+    48                                 
+    49                                 LF equ 10
+    50                                 SPACE equ " "
+    51                                 NULL equ 0
+    52                                 ESC equ 27
+    53                                 
+    54                                 
+    55                                 
+    56                                 
+    57                                 GL_COLOR_BUFFER_BIT equ 16384
+    58                                 GL_POINTS equ 0
+    59                                 GL_POLYGON equ 9
+    60                                 GL_PROJECTION equ 5889
+    61                                 
+    62                                 GLUT_RGB equ 0
+    63                                 GLUT_SINGLE equ 0
+    64                                 
+    65                                 
+    66                                 
+    67                                 
+    68                                 SPD_MIN equ 1
+    69                                 SPD_MAX equ 50
+    70                                 
+    71                                 CLR_MIN equ 0
+    72                                 CLR_MAX equ 0xFFFFFF
+    73                                 
+    74                                 SIZ_MIN equ 100
+    75                                 SIZ_MAX equ 2000
+    76                                 
+    77                                 
+    78                                 
+    79                                 
+    80                                 STR_LENGTH equ 12
+    81                                 
+    82 00000000 55736167653A202E2F-    errUsage db "Usage: ./wheels -sp <septNumber> -cl <septNumber> "
+    83 00000000 776865656C73202D73-
+    84 00000000 70203C736570744E75-
+    85 00000000 6D6265723E202D636C-
+    86 00000000 203C736570744E756D-
+    87 00000000 6265723E20         
+    88 00000032 2D737A203C73657074-     db "-sz <septNumber>"
+    89 00000032 4E756D6265723E     
+    90 00000042 0A00                    db LF, NULL
+    91 00000044 4572726F722C20696E-    errBadCL db "Error, invalid or incomplete command line argument."
+    92 00000044 76616C6964206F7220-
+    93 00000044 696E636F6D706C6574-
+    94 00000044 6520636F6D6D616E64-
+    95 00000044 206C696E6520617267-
+    96 00000044 756D656E742E       
+    97 00000077 0A00                    db LF, NULL
+    98                                 
+    99 00000079 4572726F722C207370-    errSpdSpec db "Error, speed specifier incorrect."
+   100 00000079 656564207370656369-
+   101 00000079 6669657220696E636F-
+   102 00000079 72726563742E       
+   103 0000009A 0A00                    db LF, NULL
+   104 0000009C 4572726F722C207370-    errSpdValue db "Error, speed value must be between 1 and 101(7)."
+   105 0000009C 6565642076616C7565-
+   106 0000009C 206D75737420626520-
+   107 0000009C 6265747765656E2031-
+   108 0000009C 20616E642031303128-
+   109 0000009C 37292E             
+   110 000000CC 0A00                    db LF, NULL
+   111                                 
+   112 000000CE 4572726F722C20636F-    errClrSpec db "Error, color specifier incorrect."
+   113 000000CE 6C6F72207370656369-
+   114 000000CE 6669657220696E636F-
+   115 000000CE 72726563742E       
+   116 000000EF 0A00                    db LF, NULL
+   117 000000F1 4572726F722C20636F-    errClrValue db "Error, color value must be between 0 and 262414110(7)."
+   118 000000F1 6C6F722076616C7565-
+   119 000000F1 206D75737420626520-
+   120 000000F1 6265747765656E2030-
+   121 000000F1 20616E642032363234-
+   122 000000F1 31343131302837292E 
+   123 00000127 0A00                    db LF, NULL
+   124                                 
+   125 00000129 4572726F722C207369-    errSizSpec db "Error, size specifier incorrect."
+   126 00000129 7A6520737065636966-
+   127 00000129 69657220696E636F72-
+   128 00000129 726563742E         
+   129 00000149 0A00                    db LF, NULL
+   130 0000014B 4572726F722C207369-    errSizValue db "Error, size value must be between 202(7) and 5555(7)."
+   131 0000014B 7A652076616C756520-
+   132 0000014B 6D7573742062652062-
+   133 0000014B 65747765656E203230-
+   134 0000014B 3228372920616E6420-
+   135 0000014B 353535352837292E   
+   136 00000180 0A00                    db LF, NULL
+   137                                 
+   138                                 
+   139                                 
+   140                                 
+   141                                 
+   142 00000182 0000000000000000       t dq 0.0
+   143 0000018A 0000000000000000       s dq 0.0
+   144 00000192 FCA9F1D24D62503F       tStep dq 0.001
+   145 0000019A 0000000000000000       sStep dq 0.0
+   146 000001A2 0000000000000000       x dq 0
+   147 000001AA 0000000000000000       y dq 0
+   148 000001B2 00000000004CBD40       scale dq 7500.0
+   149                                 
+   150 000001BA 0000000000000000       fltZero dq 0.0
+   151 000001C2 000000000000F03F       fltOne dq 1.0
+   152 000001CA 0000000000000040       fltTwo dq 2.0
+   153 000001D2 0000000000000840       fltThree dq 3.0
+   154 000001DA 0000000000001040       fltFour dq 4.0
+   155 000001E2 0000000000001840       fltSix dq 6.0
+   156 000001EA 0000000000000000       fltTwoPiS dq 0.0
+   157                                 
+   158 000001F2 F4D64354FB210940       pi dq 3.14159265358
+   159                                 
+   160 000001FA 0000000000000000       fltTmp1 dq 0.0
+   161 00000202 0000000000000000       fltTmp2 dq 0.0
+   162                                 
+   163 0000020A 00000000               red dd 0
+   164 0000020E 00000000               green dd 0
+   165 00000212 00000000               blue dd 0
+   166                                 
+   167                                 
+   168                                 
+   169                                 
+   170                                 [section .text]
+   171                                 
+   172                                 
+   173                                 
+   174                                 
+   175                                 [extern glutInit]
+   176                                 %line 139+0 a10procs.asm
+   177                                 [extern glutInitDisplayMode]
+   178                                 [extern glutInitWindowSize]
+   179                                 [extern glutInitWindowPosition]
+   180                                 %line 140+1 a10procs.asm
+   181                                 [extern glutCreateWindow]
+   182                                 %line 140+0 a10procs.asm
+   183                                 [extern glutMainLoop]
+   184                                 %line 141+1 a10procs.asm
+   185                                 [extern glutDisplayFunc]
+   186                                 %line 141+0 a10procs.asm
+   187                                 [extern glutIdleFunc]
+   188                                 [extern glutReshapeFunc]
+   189                                 [extern glutKeyboardFunc]
+   190                                 %line 142+1 a10procs.asm
+   191                                 [extern glutSwapBuffers]
+   192                                 %line 142+0 a10procs.asm
+   193                                 [extern gluPerspective]
+   194                                 [extern glutPostRedisplay]
+   195                                 %line 143+1 a10procs.asm
+   196                                 [extern glClearColor]
+   197                                 %line 143+0 a10procs.asm
+   198                                 [extern glClearDepth]
+   199                                 [extern glDepthFunc]
+   200                                 [extern glEnable]
+   201                                 [extern glShadeModel]
+   202                                 %line 144+1 a10procs.asm
+   203                                 [extern glClear]
+   204                                 %line 144+0 a10procs.asm
+   205                                 [extern glLoadIdentity]
+   206                                 [extern glMatrixMode]
+   207                                 [extern glViewport]
+   208                                 %line 145+1 a10procs.asm
+   209                                 [extern glTranslatef]
+   210                                 %line 145+0 a10procs.asm
+   211                                 [extern glRotatef]
+   212                                 [extern glBegin]
+   213                                 [extern glEnd]
+   214                                 [extern glVertex3f]
+   215                                 [extern glColor3f]
+   216                                 %line 146+1 a10procs.asm
+   217                                 [extern glVertex2f]
+   218                                 %line 146+0 a10procs.asm
+   219                                 [extern glVertex2i]
+   220                                 [extern glColor3ub]
+   221                                 [extern glOrtho]
+   222                                 [extern glFlush]
+   223                                 [extern glVertex2d]
+   224                                 %line 147+1 a10procs.asm
+   225                                 
+   226                                 [extern cos]
+   227                                 %line 148+0 a10procs.asm
+   228                                 [extern sin]
+   229                                 %line 149+1 a10procs.asm
+   230                                 
+   231                                 
+   232                                 
+   233                                 
+   234                                 
+   235                                 
+   236                                 [global atoint]
+   237                                 atoint:
+   238                                 
+   239                                 
+   240 00000000 55                      push rbp
+   241 00000001 4889E5                  mov rbp, rsp
+   242                                 
+   243 00000004 4154                    push r12
+   244 00000006 4155                    push r13
+   245 00000008 4156                    push r14
+   246 0000000A 4157                    push r15
+   247                                 
+   248                                 
+   249 0000000C 49C7C500000000          mov r13, 0
+   250 00000013 49C7C600000000          mov r14, 0
+   251                                 
+   252                                 _getDigits:
+   253 0000001A 42803C3700              cmp byte[rdi+r14], NULL
+   254 0000001F 7406                    je _countDone
+   255 00000021 49FFC5                  inc r13
+   256 00000024 49FFC6                  inc r14
+   257 00000027 EBEF                    jmp _getDigits
+   258                                 _countDone:
+   259                                 
+   260 00000029 49C7C600000000          mov r14, 0
+   261 00000030 49C7C700000000          mov r15, 0
+   262                                 
+   263 00000037 49C7C300000000          mov r11, 0
+   264                                 _septoint:
+   265                                 
+   266 0000003E 42803C3700              cmp byte[rdi+r14], NULL
+   267 00000043 7430                    je _conversionDone
+   268 00000045 49FFCD                  dec r13
+   269 00000048 48C7C001000000          mov rax, 1
+   270 0000004F 4C89E9                  mov rcx, r13
+   271                                 _mul7loop:
+   272 00000052 4883F900                cmp rcx, 0
+   273 00000056 740A                    je _nomul
+   274 00000058 49C7C207000000          mov r10, 7
+   275 0000005F 49F7E2                  mul r10
+   276 00000062 E2EC                    loop _mul7loop
+   277                                 _nomul:
+   278                                 
+   279 00000064 468A1C37                mov r11b, byte[rdi+r14]
+   280 00000068 4180EB30                sub r11b, 0x30
+   281 0000006C 49F7E3                  mul r11
+   282 0000006F 4901C7                  add r15, rax
+   283 00000072 49FFC6                  inc r14
+   284 00000075 EBC5                    jmp _septoint
+   285                                 _conversionDone:
+   286 00000077 4C89F8                  mov rax, r15
+   287                                 
+   288 0000007A 415F                    pop r15
+   289 0000007C 415E                    pop r14
+   290 0000007E 415D                    pop r13
+   291 00000080 415C                    pop r12
+   292 00000082 4889EC                  mov rsp, rbp
+   293 00000085 5D                      pop rbp
+   294 00000086 C3                     ret
+   295                                 
+   296                                 
+   297                                 
+   298                                 
+   299                                 
+   300                                 
+   301                                 
+   302                                 
+   303                                 
+   304                                 
+   305                                 
+   306                                 
+   307                                 
+   308                                 
+   309                                 
+   310                                 
+   311                                 
+   312                                 
+   313                                 
+   314                                 
+   315                                 
+   316                                 
+   317                                 
+   318                                 
+   319                                 
+   320                                 [global getParams]
+   321                                 getParams:
+   322                                 
+   323 00000087 55                      push rbp
+   324 00000088 4889E5                  mov rbp, rsp
+   325 0000008B 4883EC0C                sub rsp, 12
+   326 0000008F 53                      push rbx
+   327 00000090 4154                    push r12
+   328 00000092 4155                    push r13
+   329 00000094 4156                    push r14
+   330 00000096 4157                    push r15
+   331                                 
+   332                                 
+   333 00000098 48C7C300000000          mov rbx, 0
+   334 0000009F 4989F4                  mov r12, rsi
+   335 000000A2 49C7C500000000          mov r13, 0
+   336 000000A9 49C7C600000000          mov r14, 0
+   337 000000B0 49C7C700000000          mov r15, 0
+   338 000000B7 8955FC                  mov dword[rbp-4], edx
+   339 000000BA 894DF8                  mov dword[rbp-8], ecx
+   340 000000BD 448945F4                mov dword[rbp-12], r8d
+   341                                 
+   342                                 
+   343                                 
+   344                                 
+   345                                 
+   346                                 
+   347                                 
+   348                                 
+   349                                 
+   350                                 
+   351                                 
+   352                                 
+   353                                 
+   354                                 
+   355                                 
+   356 000000C1 4883FF01                cmp rdi, 1
+   357 000000C5 7511                    jne _notone
+   358 000000C7 48C7C7[00000000]        mov rdi, errUsage
+   359 000000CE E8BF080000              call printString
+   360 000000D3 B000                    mov al, FALSE
+   361 000000D5 E910020000              jmp _endfunction
+   362                                 _notone:
+   363                                 
+   364                                 
+   365 000000DA 4883FF07                cmp rdi, 7
+   366 000000DE 7411                    je isSeven
+   367 000000E0 48C7C7[00000000]        mov rdi, errBadCL
+   368 000000E7 E8A6080000              call printString
+   369 000000EC B000                    mov al, FALSE
+   370 000000EE E9F7010000              jmp _endfunction
+   371                                 isSeven:
+   372                                 
+   373                                 
+   374                                 
+   375 000000F3 498B5C2408              mov rbx, qword[r12+(8*1)]
+   376 000000F8 803B2D                  cmp byte[rbx], '-'
+   377 000000FB 7517                    jne _spdspecErr
+   378 000000FD 807B0173                cmp byte[rbx+1], 's'
+   379 00000101 7511                    jne _spdspecErr
+   380 00000103 807B0270                cmp byte[rbx+2], 'p'
+   381 00000107 750B                    jne _spdspecErr
+   382 00000109 807B0300                cmp byte[rbx+3], NULL
+   383 0000010D 7505                    jne _spdspecErr
+   384 0000010F 49C7C501000000          mov r13, 1
+   385                                 _spdspecErr:
+   386 00000116 4983FD01                cmp r13, 1
+   387 0000011A 7411                    je _nospdspecErr
+   388 0000011C 48C7C7[00000000]        mov rdi, errSpdSpec
+   389 00000123 E86A080000              call printString
+   390 00000128 B000                    mov al, FALSE
+   391 0000012A E9BB010000              jmp _endfunction
+   392                                 _nospdspecErr:
+   393 0000012F 49C7C500000000          mov r13, 0
+   394                                 
+   395                                 
+   396 00000136 498B5C2418              mov rbx, qword[r12+(8*3)]
+   397 0000013B 803B2D                  cmp byte[rbx], '-'
+   398 0000013E 7517                    jne _clrspecErr
+   399 00000140 807B0163                cmp byte[rbx+1], 'c'
+   400 00000144 7511                    jne _clrspecErr
+   401 00000146 807B026C                cmp byte[rbx+2], 'l'
+   402 0000014A 750B                    jne _clrspecErr
+   403 0000014C 807B0300                cmp byte[rbx+3], NULL
+   404 00000150 7505                    jne _clrspecErr
+   405 00000152 49C7C501000000          mov r13, 1
+   406                                 _clrspecErr:
+   407 00000159 4983FD01                cmp r13, 1
+   408 0000015D 7411                    je _noclrspecErr
+   409 0000015F 48C7C7[00000000]        mov rdi, errClrSpec
+   410 00000166 E827080000              call printString
+   411 0000016B B000                    mov al, FALSE
+   412 0000016D E978010000              jmp _endfunction
+   413                                 _noclrspecErr:
+   414 00000172 49C7C500000000          mov r13, 0
+   415                                 
+   416                                 
+   417 00000179 498B5C2428              mov rbx, qword[r12+(8*5)]
+   418 0000017E 803B2D                  cmp byte[rbx], '-'
+   419 00000181 7517                    jne _szspecErr
+   420 00000183 807B0173                cmp byte[rbx+1], 's'
+   421 00000187 7511                    jne _szspecErr
+   422 00000189 807B027A                cmp byte[rbx+2], 'z'
+   423 0000018D 750B                    jne _szspecErr
+   424 0000018F 807B0300                cmp byte[rbx+3], NULL
+   425 00000193 7505                    jne _szspecErr
+   426 00000195 49C7C501000000          mov r13, 1
+   427                                 _szspecErr:
+   428 0000019C 4983FD01                cmp r13, 1
+   429 000001A0 7411                    je _noszspecErr
+   430 000001A2 48C7C7[00000000]        mov rdi, errSizSpec
+   431 000001A9 E8E4070000              call printString
+   432 000001AE B000                    mov al, FALSE
+   433 000001B0 E935010000              jmp _endfunction
+   434                                 _noszspecErr:
+   435 000001B5 49C7C500000000          mov r13, 0
+   436                                 
+   437                                 
+   438                                 
+   439                                 
+   440                                 
+   441                                 
+   442 000001BC 498B5C2410              mov rbx, qword[r12+(8*2)]
+   443 000001C1 49C7C500000000          mov r13, 0
+   444                                 _spvaluecheck:
+   445 000001C8 42803C2B00              cmp byte[rbx+r13], NULL
+   446 000001CD 7424                    je _spvalDone
+   447 000001CF 42803C2B30              cmp byte[rbx+r13], 0x30
+   448 000001D4 720A                    jb _spvalErr
+   449 000001D6 42803C2B36              cmp byte[rbx+r13], 0x36
+   450 000001DB 7703                    ja _spvalErr
+   451 000001DD 49FFC5                  inc r13
+   452 000001E0 EBE4                    jmp _spvaluecheck
+   453                                 _spvalErr:
+   454 000001E2 48C7C7[00000000]        mov rdi, errSpdValue
+   455 000001E9 E8A4070000              call printString
+   456 000001EE B000                    mov al, FALSE
+   457 000001F0 E9F5000000              jmp _endfunction
+   458                                 _spvalDone:
+   459                                 
+   460                                 
+   461 000001F5 498B5C2420              mov rbx, qword[r12+(8*4)]
+   462 000001FA 49C7C500000000          mov r13, 0
+   463                                 _clrvaluecheck:
+   464 00000201 42803C2B00              cmp byte[rbx+r13], NULL
+   465 00000206 7424                    je _clrvalDone
+   466 00000208 42803C2B30              cmp byte[rbx+r13], 0x30
+   467 0000020D 720A                    jb _clrvalErr
+   468 0000020F 42803C2B36              cmp byte[rbx+r13], 0x36
+   469 00000214 7703                    ja _clrvalErr
+   470 00000216 49FFC5                  inc r13
+   471 00000219 EBE4                    jmp _clrvaluecheck
+   472                                 _clrvalErr:
+   473 0000021B 48C7C7[00000000]        mov rdi, errClrValue
+   474 00000222 E86B070000              call printString
+   475 00000227 B000                    mov al, FALSE
+   476 00000229 E9BC000000              jmp _endfunction
+   477                                 _clrvalDone:
+   478                                 
+   479                                 
+   480 0000022E 498B5C2430              mov rbx, qword[r12+(8*6)]
+   481 00000233 49C7C500000000          mov r13, 0
+   482                                 _szvaluecheck:
+   483 0000023A 42803C2B00              cmp byte[rbx+r13], NULL
+   484 0000023F 7424                    je _szvalDone
+   485 00000241 42803C2B30              cmp byte[rbx+r13], 0x30
+   486 00000246 720A                    jb _szvalErr
+   487 00000248 42803C2B36              cmp byte[rbx+r13], 0x36
+   488 0000024D 7703                    ja _szvalErr
+   489 0000024F 49FFC5                  inc r13
+   490 00000252 EBE4                    jmp _szvaluecheck
+   491                                 _szvalErr:
+   492 00000254 48C7C7[00000000]        mov rdi, errSizValue
+   493 0000025B E832070000              call printString
+   494 00000260 B000                    mov al, FALSE
+   495 00000262 E983000000              jmp _endfunction
+   496                                 _szvalDone:
+   497                                 
+   498                                 
+   499                                 
+   500                                 
+   501                                 
+   502                                 
+   503                                 
+   504                                 
+   505                                 
+   506                                 
+   507                                 
+   508 00000267 498B7C2410              mov rdi, qword[r12+(8*2)]
+   509 0000026C E88AFDFFFF              call atoint
+   510 00000271 4989C5                  mov r13, rax
+   511                                 
+   512 00000274 4983FD01                cmp r13, SPD_MIN
+   513 00000278 0F825EFFFFFF            jb _spvalErr
+   514 0000027E 4983FD32                cmp r13, SPD_MAX
+   515 00000282 0F8754FFFFFF            ja _spvalErr
+   516                                 
+   517                                 
+   518                                 
+   519 00000288 498B7C2420              mov rdi, qword[r12+(8*4)]
+   520 0000028D E869FDFFFF              call atoint
+   521 00000292 4989C6                  mov r14, rax
+   522                                 
+   523 00000295 4983FE00                cmp r14, CLR_MIN
+   524 00000299 727E                    jb _clrvalErr
+   525 0000029B 4981FEFFFFFF00          cmp r14, CLR_MAX
+   526 000002A2 0F876DFFFFFF            ja _clrvalErr
+   527                                 
+   528                                 
+   529                                 
+   530 000002A8 498B7C2430              mov rdi, qword[r12+(8*6)]
+   531 000002AD E849FDFFFF              call atoint
+   532 000002B2 4989C7                  mov r15, rax
+   533                                 
+   534 000002B5 4983FF64                cmp r15, SIZ_MIN
+   535 000002B9 7297                    jb _szvalErr
+   536 000002BB 4981FFD0070000          cmp r15, SIZ_MAX
+   537 000002C2 778E                    ja _szvalErr
+   538                                 
+   539                                 
+   540                                 
+   541 000002C4 48C7C200000000          mov rdx, 0
+   542 000002CB 48C7C100000000          mov rcx, 0
+   543 000002D2 49C7C000000000          mov r8, 0
+   544                                 
+   545 000002D9 8B55FC                  mov edx, dword[rbp-4]
+   546 000002DC 8B4DF8                  mov ecx, dword[rbp-8]
+   547 000002DF 448B45F4                mov r8d, dword[rbp-12]
+   548                                 
+   549 000002E3 6744892A                mov dword[edx], r13d
+   550 000002E7 67448931                mov dword[ecx], r14d
+   551 000002EB 67458938                mov dword[r8d], r15d
+   552                                 
+   553                                 _endfunction:
+   554                                 
+   555 000002EF 415F                    pop r15
+   556 000002F1 415E                    pop r14
+   557 000002F3 415D                    pop r13
+   558 000002F5 415C                    pop r12
+   559 000002F7 5B                      pop rbx
+   560 000002F8 4889EC                  mov rsp, rbp
+   561 000002FB 5D                      pop rbp
+   562 000002FC C3                     ret
+   563                                 
+   564                                 
+   565                                 
+   566                                 
+   567                                 
+   568                                 
+   569                                 
+   570                                 
+   571                                 
+   572                                 
+   573                                 
+   574                                 
+   575                                 
+   576                                 [common speed 1:4]
+   577                                 [common color 1:4]
+   578                                 [common size 1:4]
+   579                                 
+   580                                 [global drawWheels]
+   581                                 drawWheels:
+   582 000002FD 55                      push rbp
+   583                                 
+   584                                 
+   585                                 
+   586                                 
+   587                                 
+   588                                 
+   589                                 
+   590                                 
+   591                                 
+   592 000002FE F20F2A0425[00000000]      cvtsi2sd xmm0, dword[speed]
+   593 00000307 F20F5E0425[00000000]      divsd xmm0, qword[scale]
+   594 00000310 F20F110425[00000000]      movsd qword[sStep], xmm0
+   595                                 
+   596                                 
+   597                                 
+   598                                 
+   599                                 
+   600 00000319 48C7C700400000          mov rdi, GL_COLOR_BUFFER_BIT
+   601 00000320 E8(F6FFFFFF)            call glClear
+   602                                 
+   603                                 
+   604 00000325 48C7C700000000          mov rdi, GL_POINTS
+   605 0000032C E8(F6FFFFFF)            call glBegin
+   606                                 
+   607                                 
+   608                                 
+   609                                 
+   610                                 
+   611                                 
+   612 00000331 49C7C000000000          mov r8, 0
+   613 00000338 49C7C100000000          mov r9, 0
+   614 0000033F 4C630425[00000000]      movsxd r8, dword[color]
+   615                                 
+   616                                 
+   617                                 
+   618                                 
+   619                                 
+   620                                 
+   621                                 
+   622 00000347 4588C1                  mov r9b, r8b
+   623 0000034A 44890C25[00000000]      mov dword[blue], r9d
+   624                                 
+   625 00000352 49C7C100000000          mov r9, 0
+   626 00000359 49C1E808                shr r8, 8
+   627 0000035D 4588C1                  mov r9b, r8b
+   628 00000360 44890C25[00000000]      mov dword[green], r9d
+   629                                 
+   630 00000368 49C7C100000000          mov r9, 0
+   631 0000036F 49C1E808                shr r8, 8
+   632 00000373 4588C1                  mov r9b, r8b
+   633 00000376 44890C25[00000000]      mov dword[red], r9d
+   634                                 
+   635                                 
+   636                                 
+   637 0000037E 48633C25[00000000]      movsxd rdi, dword[red]
+   638 00000386 48633425[00000000]      movsxd rsi, dword[green]
+   639 0000038E 48631425[00000000]      movsxd rdx, dword[blue]
+   640 00000396 E8(F6FFFFFF)            call glColor3ub
+   641                                 
+   642                                 
+   643                                 
+   644                                 
+   645                                 
+   646                                 
+   647                                 
+   648                                 
+   649 0000039B F20F100425[00000000]      movsd xmm0, qword[fltTwo]
+   650 000003A4 F20F590425[00000000]      mulsd xmm0, qword[pi]
+   651 000003AD F20F110425[00000000]      movsd qword[fltTwoPiS], xmm0
+   652                                 
+   653                                 
+   654                                 
+   655 000003B6 F20F100425[00000000]      movsd xmm0, qword[fltZero]
+   656 000003BF F20F110425[00000000]      movsd qword[t], xmm0
+   657                                 _plotloop:
+   658 000003C8 F20F100425[00000000]      movsd xmm0, qword[t]
+   659 000003D1 F20F100C25[00000000]      movsd xmm1, qword[fltTwoPiS]
+   660 000003DA 660F2EC1                ucomisd xmm0, xmm1
+   661 000003DE 0F8357050000            jae _exitplot
+   662                                 
+   663                                 
+   664                                 
+   665 000003E4 F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   666                                 
+   667 000003ED E8(F6FFFFFF)            call cos
+   668 000003F2 F20F110425[00000000]      movsd qword[x], xmm0
+   669                                 
+   670 000003FB F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   671 00000404 E8(F6FFFFFF)            call sin
+   672 00000409 F20F110425[00000000]      movsd qword[y], xmm0
+   673                                 
+   674 00000412 F20F100425[00000000]      movsd xmm0, qword[x]
+   675 0000041B F20F100C25[00000000]      movsd xmm1, qword[y]
+   676                                 
+   677 00000424 E8(F6FFFFFF)            call glVertex2d
+   678                                 
+   679                                 
+   680                                 
+   681                                 
+   682 00000429 F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   683 00000432 E8(F6FFFFFF)            call cos
+   684                                 
+   685 00000437 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   686 00000440 F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   687                                 
+   688 00000449 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   689 00000452 F20F590425[00000000]      mulsd xmm0, qword[s]
+   690                                 
+   691 0000045B E8(F6FFFFFF)            call cos
+   692                                 
+   693 00000460 F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   694                                 
+   695 00000469 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   696                                 
+   697 00000472 F20F580425[00000000]      addsd xmm0, qword[fltTmp2]
+   698 0000047B F20F110425[00000000]      movsd qword[x], xmm0
+   699                                 
+   700                                 
+   701 00000484 F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   702 0000048D E8(F6FFFFFF)            call sin
+   703                                 
+   704 00000492 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   705 0000049B F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   706                                 
+   707 000004A4 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   708 000004AD F20F590425[00000000]      mulsd xmm0, qword[s]
+   709                                 
+   710 000004B6 E8(F6FFFFFF)            call sin
+   711                                 
+   712 000004BB F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   713                                 
+   714 000004C4 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   715                                 
+   716 000004CD F20F580425[00000000]      addsd xmm0, qword[fltTmp2]
+   717 000004D6 F20F110425[00000000]      movsd qword[y], xmm0
+   718                                 
+   719 000004DF F20F100425[00000000]      movsd xmm0, qword[x]
+   720 000004E8 F20F100C25[00000000]      movsd xmm1, qword[y]
+   721                                 
+   722 000004F1 E8(F6FFFFFF)            call glVertex2d
+   723                                 
+   724                                 
+   725                                 
+   726                                 
+   727 000004F6 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   728 000004FF F20F590425[00000000]      mulsd xmm0, qword[s]
+   729 00000508 E8(F6FFFFFF)            call cos
+   730 0000050D F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   731 00000516 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   732 0000051F F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   733                                 
+   734                                 
+   735 00000528 F20F100425[00000000]      movsd xmm0, qword[pi]
+   736 00000531 F20F590425[00000000]      mulsd xmm0, qword[fltSix]
+   737 0000053A F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   738                                 
+   739 00000543 F20F100425[00000000]      movsd xmm0, qword[pi]
+   740 0000054C F20F590425[00000000]      mulsd xmm0, qword[fltFour]
+   741 00000555 F20F590425[00000000]      mulsd xmm0, qword[s]
+   742                                 
+   743 0000055E E8(F6FFFFFF)            call cos
+   744 00000563 F20F590425[00000000]      mulsd xmm0, qword[t]
+   745 0000056C F20F5E0425[00000000]      divsd xmm0, qword[fltTmp2]
+   746 00000575 F20F580425[00000000]      addsd xmm0, qword[fltTmp1]
+   747 0000057E F20F110425[00000000]      movsd qword[x], xmm0
+   748                                 
+   749 00000587 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   750 00000590 F20F590425[00000000]      mulsd xmm0, qword[s]
+   751 00000599 E8(F6FFFFFF)            call sin
+   752 0000059E F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   753 000005A7 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   754 000005B0 F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   755                                 
+   756                                 
+   757 000005B9 F20F100425[00000000]      movsd xmm0, qword[pi]
+   758 000005C2 F20F590425[00000000]      mulsd xmm0, qword[fltSix]
+   759 000005CB F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   760                                 
+   761 000005D4 F20F100425[00000000]      movsd xmm0, qword[pi]
+   762 000005DD F20F590425[00000000]      mulsd xmm0, qword[fltFour]
+   763 000005E6 F20F590425[00000000]      mulsd xmm0, qword[s]
+   764                                 
+   765 000005EF E8(F6FFFFFF)            call sin
+   766 000005F4 F20F590425[00000000]      mulsd xmm0, qword[t]
+   767 000005FD F20F5E0425[00000000]      divsd xmm0, qword[fltTmp2]
+   768                                 
+   769 00000606 F20F10C8                movsd xmm1, xmm0
+   770 0000060A F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   771 00000613 F20F5CC1                subsd xmm0, xmm1
+   772 00000617 F20F110425[00000000]      movsd qword[y], xmm0
+   773                                 
+   774 00000620 F20F100425[00000000]      movsd xmm0, qword[x]
+   775 00000629 F20F100C25[00000000]      movsd xmm1, qword[y]
+   776                                 
+   777 00000632 E8(F6FFFFFF)            call glVertex2d
+   778                                 
+   779                                 
+   780                                 
+   781 00000637 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   782 00000640 F20F590425[00000000]      mulsd xmm0, qword[s]
+   783 00000649 E8(F6FFFFFF)            call cos
+   784 0000064E F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   785                                 
+   786 00000657 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   787 00000660 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   788 00000669 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   789 00000672 F20F590C25[00000000]      mulsd xmm1, qword[fltFour]
+   790 0000067B F20F590C25[00000000]      mulsd xmm1, qword[s]
+   791 00000684 F20F58C1                addsd xmm0, xmm1
+   792 00000688 E8(F6FFFFFF)            call cos
+   793 0000068D F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   794                                 
+   795                                 
+   796 00000696 F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   797 0000069F F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   798 000006A8 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   799                                 
+   800                                 
+   801 000006B1 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   802 000006BA F20F590C25[00000000]      mulsd xmm1, qword[fltSix]
+   803                                 
+   804                                 
+   805 000006C3 F20F101425[00000000]      movsd xmm2, qword[fltTmp2]
+   806 000006CC F20F591425[00000000]      mulsd xmm2, qword[t]
+   807 000006D5 F20F5ED1                divsd xmm2, xmm1
+   808                                 
+   809 000006D9 F20F58C2                addsd xmm0, xmm2
+   810 000006DD F20F110425[00000000]      movsd qword[x], xmm0
+   811                                 
+   812                                 
+   813 000006E6 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   814 000006EF F20F590425[00000000]      mulsd xmm0, qword[s]
+   815 000006F8 E8(F6FFFFFF)            call sin
+   816 000006FD F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   817                                 
+   818 00000706 F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   819 0000070F F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   820 00000718 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   821 00000721 F20F590C25[00000000]      mulsd xmm1, qword[fltFour]
+   822 0000072A F20F590C25[00000000]      mulsd xmm1, qword[s]
+   823 00000733 F20F58C1                addsd xmm0, xmm1
+   824 00000737 E8(F6FFFFFF)            call sin
+   825 0000073C F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   826                                 
+   827                                 
+   828 00000745 F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   829 0000074E F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   830 00000757 F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   831                                 
+   832                                 
+   833 00000760 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   834 00000769 F20F590C25[00000000]      mulsd xmm1, qword[fltSix]
+   835                                 
+   836                                 
+   837 00000772 F20F101425[00000000]      movsd xmm2, qword[fltTmp2]
+   838 0000077B F20F591425[00000000]      mulsd xmm2, qword[t]
+   839 00000784 F20F5ED1                divsd xmm2, xmm1
+   840                                 
+   841                                 
+   842 00000788 F20F5CC2                subsd xmm0, xmm2
+   843 0000078C F20F110425[00000000]      movsd qword[y], xmm0
+   844                                 
+   845                                 
+   846                                 
+   847 00000795 F20F100425[00000000]      movsd xmm0, qword[x]
+   848 0000079E F20F100C25[00000000]      movsd xmm1, qword[y]
+   849                                 
+   850 000007A7 E8(F6FFFFFF)            call glVertex2d
+   851                                 
+   852                                 
+   853                                 
+   854 000007AC F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   855 000007B5 F20F590425[00000000]      mulsd xmm0, qword[s]
+   856 000007BE E8(F6FFFFFF)            call cos
+   857 000007C3 F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   858                                 
+   859 000007CC F20F100425[00000000]      movsd xmm0, qword[pi]
+   860 000007D5 F20F590425[00000000]      mulsd xmm0, qword[fltFour]
+   861 000007DE F20F590425[00000000]      mulsd xmm0, qword[s]
+   862                                 
+   863 000007E7 F20F100C25[00000000]      movsd xmm1, qword[fltTwoPiS]
+   864 000007F0 F20F5E0C25[00000000]      divsd xmm1, qword[fltThree]
+   865                                 
+   866 000007F9 F20F5CC1                subsd xmm0, xmm1
+   867 000007FD E8(F6FFFFFF)            call cos
+   868 00000802 F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   869                                 
+   870                                 
+   871                                 
+   872 0000080B F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   873 00000814 F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   874 0000081D F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   875                                 
+   876                                 
+   877 00000826 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   878 0000082F F20F590C25[00000000]      mulsd xmm1, qword[fltSix]
+   879                                 
+   880                                 
+   881 00000838 F20F101425[00000000]      movsd xmm2, qword[fltTmp2]
+   882 00000841 F20F591425[00000000]      mulsd xmm2, qword[t]
+   883 0000084A F20F5ED1                divsd xmm2, xmm1
+   884                                 
+   885                                 
+   886 0000084E F20F58C2                addsd xmm0, xmm2
+   887 00000852 F20F110425[00000000]      movsd qword[x], xmm0
+   888                                 
+   889                                 
+   890 0000085B F20F100425[00000000]      movsd xmm0, qword[fltTwoPiS]
+   891 00000864 F20F590425[00000000]      mulsd xmm0, qword[s]
+   892 0000086D E8(F6FFFFFF)            call sin
+   893 00000872 F20F110425[00000000]      movsd qword[fltTmp1], xmm0
+   894                                 
+   895 0000087B F20F100C25[00000000]      movsd xmm1, qword[fltTwoPiS]
+   896 00000884 F20F5E0C25[00000000]      divsd xmm1, qword[fltThree]
+   897                                 
+   898 0000088D F20F100425[00000000]      movsd xmm0, qword[pi]
+   899 00000896 F20F590425[00000000]      mulsd xmm0, qword[fltFour]
+   900 0000089F F20F590425[00000000]      mulsd xmm0, qword[s]
+   901                                 
+   902 000008A8 F20F5CC1                subsd xmm0, xmm1
+   903 000008AC E8(F6FFFFFF)            call sin
+   904 000008B1 F20F110425[00000000]      movsd qword[fltTmp2], xmm0
+   905                                 
+   906                                 
+   907                                 
+   908 000008BA F20F100425[00000000]      movsd xmm0, qword[fltTmp1]
+   909 000008C3 F20F590425[00000000]      mulsd xmm0, qword[fltTwo]
+   910 000008CC F20F5E0425[00000000]      divsd xmm0, qword[fltThree]
+   911                                 
+   912                                 
+   913 000008D5 F20F100C25[00000000]      movsd xmm1, qword[pi]
+   914 000008DE F20F590C25[00000000]      mulsd xmm1, qword[fltSix]
+   915                                 
+   916                                 
+   917 000008E7 F20F101425[00000000]      movsd xmm2, qword[fltTmp2]
+   918 000008F0 F20F591425[00000000]      mulsd xmm2, qword[t]
+   919 000008F9 F20F5ED1                divsd xmm2, xmm1
+   920                                 
+   921                                 
+   922 000008FD F20F5CC2                subsd xmm0, xmm2
+   923 00000901 F20F110425[00000000]      movsd qword[y], xmm0
+   924                                 
+   925 0000090A F20F100425[00000000]      movsd xmm0, qword[x]
+   926 00000913 F20F100C25[00000000]      movsd xmm1, qword[y]
+   927                                 
+   928 0000091C E8(F6FFFFFF)            call glVertex2d
+   929                                 
+   930                                 
+   931                                 
+   932                                 
+   933 00000921 F20F100425[00000000]      movsd xmm0, qword[t]
+   934 0000092A F20F580425[00000000]      addsd xmm0, qword[tStep]
+   935 00000933 F20F110425[00000000]      movsd qword[t], xmm0
+   936 0000093C E982FAFFFF              jmp _plotloop
+   937                                 _exitplot:
+   938                                 
+   939                                 
+   940                                 
+   941 00000941 E8(F6FFFFFF)            call glEnd
+   942 00000946 E8(F6FFFFFF)            call glFlush
+   943                                 
+   944                                 
+   945                                 
+   946                                 
+   947                                 
+   948                                 
+   949 0000094B F20F100425[00000000]      movsd xmm0, qword [s]
+   950 00000954 F20F580425[00000000]      addsd xmm0, qword [sStep]
+   951 0000095D F20F110425[00000000]      movsd qword [s], xmm0
+   952                                 
+   953 00000966 F20F100425[00000000]      movsd xmm0, qword [s]
+   954 0000096F F20F100C25[00000000]      movsd xmm1, qword [fltOne]
+   955 00000978 660F2EC1                ucomisd xmm0, xmm1
+   956 0000097C 7610                    jbe resetDone
+   957                                 
+   958 0000097E F20F100425[00000000]      movsd xmm0, qword [fltZero]
+   959 00000987 F20F110425[00000000]      movsd qword [sStep], xmm0
+   960                                 resetDone:
+   961                                 
+   962 00000990 E8(F6FFFFFF)            call glutPostRedisplay
+   963                                 
+   964                                 
+   965                                 _endend:
+   966 00000995 5D                      pop rbp
+   967 00000996 C3                      ret
+   968                                 
+   969                                 
+   970                                 
+   971                                 
+   972                                 
+   973                                 
+   974                                 
+   975                                 
+   976                                 
+   977                                 
+   978                                 
+   979                                 
+   980                                 
+   981                                 [global printString]
+   982                                 printString:
+   983 00000997 53                      push rbx
+   984                                 
+   985                                 
+   986                                 
+   987                                 
+   988 00000998 4889FB                  mov rbx, rdi
+   989 0000099B 48C7C200000000          mov rdx, 0
+   990                                 strCountLoop:
+   991 000009A2 803B00                  cmp byte [rbx], NULL
+   992 000009A5 7406                    je strCountDone
+   993 000009A7 48FFC3                  inc rbx
+   994 000009AA 48FFC2                  inc rdx
+   995 000009AD EBF1                    jmp strCountLoop
+   996                                 strCountDone:
+   997                                 
+   998 000009AF 4883FA00                cmp rdx, 0
+   999 000009B3 7411                    je prtDone
+  1000                                 
+  1001                                 
+  1002                                 
+  1003                                 
+  1004 000009B5 48C7C001000000          mov rax, SYS_write
+  1005 000009BC 4889FE                  mov rsi, rdi
+  1006 000009BF 48C7C701000000          mov rdi, STDOUT
+  1007                                 
+  1008 000009C6 0F05                    syscall
+  1009                                 
+  1010                                 
+  1011                                 
+  1012                                 
+  1013                                 prtDone:
+  1014 000009C8 5B                      pop rbx
+  1015 000009C9 C3                      ret
+  1016                                 
+  1017                                 
+  1018                                 
